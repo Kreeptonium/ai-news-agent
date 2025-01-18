@@ -1,7 +1,6 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
-import { errorHandler } from './middleware/errorHandler';
 
 // Create Express server
 const app = express();
@@ -18,11 +17,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 
 // Basic health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handling
-app.use(errorHandler);
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
 
 export default app;
